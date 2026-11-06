@@ -563,6 +563,16 @@ func (s *QueryIteratorSuite) TestQueryIteratorOptionWithNamespace() {
 	s.Equal(namespace, req.GetNamespace())
 }
 
+func (s *QueryIteratorSuite) TestQueryIteratorOptionWithGuaranteeTimestamp() {
+	req, err := NewQueryIteratorOption("coll").
+		WithConsistencyLevel(entity.ClCustomized).
+		WithGuaranteeTimestamp(123).
+		Request()
+
+	s.Require().NoError(err)
+	s.EqualValues(123, req.GetGuaranteeTimestamp())
+}
+
 func (s *QueryIteratorSuite) TestQueryIteratorOptionWithRLSContext() {
 	req, err := NewQueryIteratorOption("coll").
 		WithRLSPrincipal("alice").

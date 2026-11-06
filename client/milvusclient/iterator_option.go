@@ -190,6 +190,7 @@ type queryIteratorOption struct {
 	iteratorLimit              int64
 	consistencyLevel           entity.ConsistencyLevel
 	useDefaultConsistencyLevel bool
+	guaranteeTimestamp         uint64
 }
 
 func (opt *queryIteratorOption) Request() (*milvuspb.QueryRequest, error) {
@@ -203,6 +204,7 @@ func (opt *queryIteratorOption) Request() (*milvuspb.QueryRequest, error) {
 		Expr:                  opt.expr,
 		ConsistencyLevel:      opt.consistencyLevel.CommonConsistencyLevel(),
 		UseDefaultConsistency: opt.useDefaultConsistencyLevel,
+		GuaranteeTimestamp:    opt.guaranteeTimestamp,
 		QueryParams:           entity.MapKvPairs(map[string]string{IteratorKey: "true", "reduce_stop_for_best": "true"}),
 	}, nil
 }
@@ -260,6 +262,16 @@ func (opt *queryIteratorOption) WithOutputFields(fieldNames ...string) *queryIte
 func (opt *queryIteratorOption) WithConsistencyLevel(consistencyLevel entity.ConsistencyLevel) *queryIteratorOption {
 	opt.consistencyLevel = consistencyLevel
 	opt.useDefaultConsistencyLevel = false
+	return opt
+}
+
+// WithGuaranteeTimestamp sets a caller-provided guarantee_timestamp for the
+// request. It is intended to be used together with the entity.ClCustomized
+// consistency level. When the request keeps the collection's default
+// consistency (no explicit level), the guarantee_timestamp is derived from
+// the cached write timestamp instead and this value is ignored.
+func (opt *queryIteratorOption) WithGuaranteeTimestamp(ts uint64) *queryIteratorOption {
+	opt.guaranteeTimestamp = ts
 	return opt
 }
 
